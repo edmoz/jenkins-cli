@@ -1,12 +1,12 @@
 #!/usr/bin/python 
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
- *
- * This is a Jenkins command line interface specific to the Persona, 
- * https://github.com/edmoz/browserid project. Currently just a one off
- * script with some hard coded URLS and paths
- */                                                                   
+''' This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+This is a Jenkins command line interface specific to the Persona, 
+https://github.com/edmoz/browserid project. Currently just a one off
+script with some hard coded URLS and paths
+'''                                                                   
                                                                                              
 import base64, json, optparse, os, urllib2, sys
 import xml.etree.ElementTree as ET
