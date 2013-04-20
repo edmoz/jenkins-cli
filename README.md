@@ -3,6 +3,8 @@ jenkins-cli
 
 Python command line interface to jenkins config files. Currently lots of hard coded links for the jenkin's instance used for Persona/BrowserID.  Please feel free and offer up any changes to make this more generic.
 
+Requirements: You must generate a token when you log into Jenkins by navigating to our user page, then click configure. The page may take up to 45 secs to load the first time. But there you will find your token.  Then set two env vars: JENKINS_USER, JENKINS_TOKEN.  Really it needs a config file to remove all the hard paths. Good luck.
+
     Usage: jenkins-cli.py [options]
         There are two ways to use this:
         -in batch mode set by the --all which will
