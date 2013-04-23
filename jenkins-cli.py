@@ -20,14 +20,14 @@ except:
 PROJ_ROOT = "identity.browserid."
 ROOT_URL = "https://ci.mozilla.org/view/Persona/job/"
 ENV = ['dev', 'stage', 'prod']
-CONFIG_PATH = '../config/configs.json'
+CONFIG_PATH = 'configs.json'
 configs = {}
 
-def write_disk(dir, proj, data):
+def write_disk(dir, proj, data, ext='.xml'):
     '''Write text file to disk'''
     if not os.path.exists(dir):
         os.makedirs(dir)
-    loc = os.path.join(dir, proj+'.xml')
+    loc = os.path.join(dir, proj+ext)
     with open (loc, 'w') as f:
         f.write (data)
     print '::wrote file: %s ' % loc
@@ -55,18 +55,21 @@ def get_configs(config_path):
         json_data = json.load(f)
     return [ x for x in json_data.keys()]
 
-def get_url(xml_url, prt=True):
+def get_url(url, prt=True):
     '''Return config.xml at a given URL'''
-    req = build_request(xml_url)
+    req = build_request(url)
+    ret_data = None
     try:
         response = urllib2.urlopen(req)
         data = response.read()
         if prt:
             print data
         print 'read in file: %s' % req.get_full_url()
-        return data
+        ret_data = data
     except:
         print 'unable to get url: %s' % req.get_full_url()
+        
+    return ret_data
 
 def read_file(file):
     '''Read a local xml file and print out specific xml node values'''
@@ -101,25 +104,44 @@ def write_file(file, new_file, _desc = '', _cmd = '', _cron='', _branch=''):
     print '::NEW FILE::'
     read_file(new_file)
 
+def fetch_logs(root_url, proj, start, end):
+    '''fetch log output to local disk'''
+    for num in range(start, end+1):
+        proj_path = os.path.join(ROOT_URL,
+                                 proj,
+                                 str(num),
+                                 'logText/progressiveText?start=0')
+        print proj_path
+        output = get_url(proj_path, False)
+        if output:
+            write_disk('logs', proj, output, '.%s.txt' % num)
+            
+
 if __name__ == "__main__":
     usage = """usage: jenkins-cli.py [options]
-    There are two ways to use this:
-    -in batch mode set by the --all which will
-    create and read/write to a dir of prod|stage|dev.
+    There are a few ways to use this:
+    -in batch mode set by the --all which will create and read/write to a dir of prod|stage|dev.
     -in manual read/write specific file mode which uses --proj
+    -in logs mode wich will fetch all jobs for a proj between two csv values: --logs=300,310
     """
     p = optparse.OptionParser(usage)
 
     p.add_option('--proj', '-p', help='jenkins project name for single proj mode')
     p.add_option('--all', '-a', help='dev|stage|prod, batch process all projects in a given env')
+    
     p.add_option('--write', '-w', action="store_true", help='write local file, accepts new file name in single proj mode')
-    p.add_option('--read', '-r', help='path to local file')
     p.add_option('--get', '-g', action="store_true", help='print proj config')
     p.add_option('--post', action="store_true", help='post config.xml to jenkins web service')
+    
+    p.add_option('--read', '-r', help='path to local file')
     p.add_option('--desc', '-d', help='config.xml new description string')
     p.add_option('--cmd', '-c', help='config.xml new command string')
     p.add_option('--branch', '-b', help='config.xml new branch string')
     p.add_option('--cron', '-o', help='config.xml new cron string')
+    
+    p.add_option('--logs', 
+                 help='requires proj option and a csv of: start_jid,last_jid')
+                 
     options, arguments = p.parse_args()
     
     proj = options.proj
@@ -156,6 +178,9 @@ if __name__ == "__main__":
             proj_file = proj + '.xml'
         xml_url = os.path.join(ROOT_URL, proj, 'config.xml')
         
+        if options.logs:
+            nums = options.logs.split(',')
+            fetch_logs(ROOT_URL, proj, int(nums[0]), int(nums[1]))
         if options.get:
             get_url(xml_url)
         if options.read and not options.write:
