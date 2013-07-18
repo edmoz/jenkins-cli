@@ -42,12 +42,16 @@ def build_request(xml_url):
     
 def post_url(xml_url, xml_data):
     '''Execute HTTP POST to url with data'''
-    data = ET.tostring(xml_data, encoding='UTF-8')
-    req = build_request(xml_url)
-    req.add_header('Content-Type', 'application/xml')
-    req.add_data(data)
-    response = urllib2.urlopen(req)
-    print "::POSTED TO JENKINS"
+    print "::POST starting"
+    try:
+        data = ET.tostring(xml_data)
+        req = build_request(xml_url)
+        req.add_header('Content-Type', 'application/xml')
+        req.add_data(data)
+        response = urllib2.urlopen(req)
+        print "::POSTED TO JENKINS"
+    except Exception as e:
+        print "::POST FAILED:", e
 
 def get_configs(config_path):
     '''Get config strings defined in json file'''
